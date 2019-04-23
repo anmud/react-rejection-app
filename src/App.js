@@ -5,64 +5,80 @@ const App = () => {
 
   const [questions, setQuestions] = useState([
     {
-      id: 1,        // id of the question so you can get/edit/remove by id
-      questionBody: "How much is your salary?",    // the ask
-      askee: "Ana Mo",       // person asked
-      status: "rejected"       // 'Accepted', 'Rejected', 'Unanswered'
+      id: 1,        
+      questionBody: "How much is your salary?",    
+      askee: "Ana Mo",      
+      status: "rejected"      
     },
     {
-      id: 2,        // id of the question so you can get/edit/remove by id
-      questionBody: "Would you take part in the project?",    // the ask
-      askee: "Tom Nixon",       // person asked
-      status: "accepted"       // 'Accepted', 'Rejected', 'Unanswered'
+      id: 2,        
+      questionBody: "Would you take part in the project?",   
+      askee: "Tom Nixon",      
+      status: "accepted"       
     }
   ])
   
  
   const [currentQuestion, setCurrentQuestion] = useState({id: null, questionBody: '', askee: '', status: ''})
 
-  const handleInputChange = event => {
+
+  const handleAcceptedQuestion = event => {
     const {name, value} = event.target
-    setCurrentQuestion({...currentQuestion, [name]: value})
+   setCurrentQuestion({...currentQuestion, [name]: value})
   }
 
   const acceptQuestion = ({currentQuestion, questions, setQuestions}) => {
+   
     currentQuestion.id = questions.length + 1
-    currentQuestion.status = "accepted"
+    currentQuestion.status =  "accepted" 
     setQuestions([...questions, currentQuestion])
+    
   }
+  
+  const rejectQuestion = ({currentQuestion, questions, setQuestions}) => {
+  currentQuestion.id = questions.length + 1
+  currentQuestion.status =  "rejected" 
+  setQuestions([...questions, currentQuestion])
+ 
+ }
 
-  console.log(questions)
+ console.log("questions",questions)
+
+
+ const countQuestionStatus = questions.reduce((acc, {status})=> {
+      acc[status] = (acc[status] || 0) + 1
+      console.log("acc",acc)
+      return acc
+      }, {})
+
+   
+    
+
+
+
+  
 
     return (
       <div className="App">
         <h2>Rejection app</h2>
 
-{/* form to ask questions */}
-        <form
-        onSubmit={event => {
-          event.preventDefault()
-          if(!currentQuestion.questionBody || !currentQuestion.askee) return
-          
-          acceptQuestion({currentQuestion: currentQuestion, questions: questions, setQuestions: setQuestions})
-          setCurrentQuestion({currentQuestion})
-      }}
-        >
+
       <label>Question </label>
-      <input type="text" name="questionBody" value={currentQuestion.questionBody} onChange={handleInputChange}/>
+      <input type="text" name="questionBody" value={currentQuestion.questionBody} onChange={handleAcceptedQuestion}/>
 
       <label>Person you ask </label>
-      <input type="text" name="askee"  value={currentQuestion.askee}  onChange={handleInputChange}/>
+      <input type="text" name="askee"  value={currentQuestion.askee}  onChange={handleAcceptedQuestion}/>
 
-      <button type="submit">Accepted </button>
+      <button onClick={()=> acceptQuestion({currentQuestion: currentQuestion, questions: questions, setQuestions: setQuestions})}>Accept </button>
 
-      <button>
-        Rejected
+      <button onClick={()=>rejectQuestion({currentQuestion: currentQuestion, questions: questions, setQuestions: setQuestions})}>
+        Reject
       </button>
-    </form>
+   
     <br/>
     <hr/>
     <br/>
+
 {/* list of questions */}
     <table>
     <thead>
@@ -99,9 +115,11 @@ const App = () => {
     <br/>
     <hr/>
     <br/>
+
     {/* desired output */}
-    <p>You have N rejected questions</p>
-    <p>You have N accepted questions</p>
+    <p>You have  {countQuestionStatus.rejected} rejected questions</p>
+    <p>You have {countQuestionStatus.accepted} accepted questions</p>
+    
       </div>
     );
   
