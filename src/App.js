@@ -21,10 +21,30 @@ const App = () => {
  
   const [currentQuestion, setCurrentQuestion] = useState({id: null, questionBody: '', askee: '', status: ''})
 
+  const [editing, setEditing] = useState(false)
 
-  const handleAcceptedQuestion = event => {
+  const editRow = question => {
+    setEditing(true)
+    setCurrentQuestion({...currentQuestion, id: question.id, questionBody: question.questionBody, askee: question.askee, status: question.status})
+  }
+
+  const updateQuestion = ({id, updatedQuestion, questions, setQuestions}) => {
+    console.log('updated question', updatedQuestion)
+    setEditing(false)
+    setQuestions(questions.map(question => (question.id === id ? updatedQuestion : question)))
+  }
+  
+  
+  const handleQuestion = event => {
     const {name, value} = event.target
-   setCurrentQuestion({...currentQuestion, [name]: value})
+    setCurrentQuestion({...currentQuestion, [name]: value})
+  
+  }
+
+  const handleUpdatedQuestion = event => {
+    const {name, value} = event.target
+    setCurrentQuestion({...currentQuestion, [name]: value})
+  
   }
 
   const acceptQuestion = ({currentQuestion, questions, setQuestions}) => {
@@ -44,6 +64,10 @@ const App = () => {
 
  console.log("questions",questions)
 
+ const deleteQuestion = ({questions, id}) =>{
+ const newQuestions = questions.filter(question => question.id !== id)
+ return setQuestions(newQuestions)
+ }
 
  const countQuestionStatus = questions.reduce((acc, {status})=> {
       acc[status] = (acc[status] || 0) + 1
@@ -51,7 +75,7 @@ const App = () => {
       return acc
       }, {})
 
-   
+  
     
 
 
@@ -62,19 +86,40 @@ const App = () => {
       <div className="App">
         <h2>Rejection app</h2>
 
-
+   <div>
+     {editing ? (
+       <div>
+       <form
+       onSubmit={event => {
+         event.preventDefault()
+ 
+         updateQuestion({id: currentQuestion.id, updatedQuestion: currentQuestion, questions: questions, setQuestions: setQuestions})
+       }}
+       >
+       <label>Status </label>
+       <input type="text" name="status" value={currentQuestion.status} onChange={handleUpdatedQuestion} />
+ 
+       <button>Update question</button>
+ 
+       <button onClick={() => setEditing(false)}>Cancel</button>
+     </form>
+          </div>
+     ) : (
+       <div>
       <label>Question </label>
-      <input type="text" name="questionBody" value={currentQuestion.questionBody} onChange={handleAcceptedQuestion}/>
+      <input type="text" name="questionBody" value={currentQuestion.questionBody} onChange={handleQuestion}/>
 
       <label>Person you ask </label>
-      <input type="text" name="askee"  value={currentQuestion.askee}  onChange={handleAcceptedQuestion}/>
+      <input type="text" name="askee"  value={currentQuestion.askee}  onChange={handleQuestion}/>
 
       <button onClick={()=> acceptQuestion({currentQuestion: currentQuestion, questions: questions, setQuestions: setQuestions})}>Accept </button>
 
       <button onClick={()=>rejectQuestion({currentQuestion: currentQuestion, questions: questions, setQuestions: setQuestions})}>
         Reject
       </button>
-   
+      </div>
+     )}
+   </div>
     <br/>
     <hr/>
     <br/>
@@ -99,8 +144,8 @@ const App = () => {
         <td>{question.askee}</td>
         <td>{question.status}</td>
         <td>
-          <button >Edit</button>
-          <button >Delete</button>
+          <button onClick={()=>{editRow(question)}} >Edit</button>
+          <button onClick={() => deleteQuestion({questions: questions, id: question.id})}>Delete</button>
         </td>
       </tr>
           ))
@@ -117,8 +162,10 @@ const App = () => {
     <br/>
 
     {/* desired output */}
-    <p>You have  {countQuestionStatus.rejected} rejected questions</p>
-    <p>You have {countQuestionStatus.accepted} accepted questions</p>
+    <p>You have  {countQuestionStatus.rejected || 0} rejected questions</p>
+    <p>You have {countQuestionStatus.accepted || 0} accepted questions</p>
+
+  
     
       </div>
     );
