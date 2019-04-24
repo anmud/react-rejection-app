@@ -23,13 +23,14 @@ const App = () => {
 
   const [editing, setEditing] = useState(false)
 
+  const [point, setPoint] = useState(0)
+
   const editRow = question => {
     setEditing(true)
     setCurrentQuestion({...currentQuestion, id: question.id, questionBody: question.questionBody, askee: question.askee, status: question.status})
   }
 
   const updateQuestion = ({id, updatedQuestion, questions, setQuestions}) => {
-    console.log('updated question', updatedQuestion)
     setEditing(false)
     setQuestions(questions.map(question => (question.id === id ? updatedQuestion : question)))
   }
@@ -38,13 +39,11 @@ const App = () => {
   const handleQuestion = event => {
     const {name, value} = event.target
     setCurrentQuestion({...currentQuestion, [name]: value})
-  
   }
 
   const handleUpdatedQuestion = event => {
     const {name, value} = event.target
     setCurrentQuestion({...currentQuestion, [name]: value})
-  
   }
 
   const acceptQuestion = ({currentQuestion, questions, setQuestions}) => {
@@ -62,8 +61,7 @@ const App = () => {
  
  }
 
- console.log("questions",questions)
-
+ 
  const deleteQuestion = ({questions, id}) =>{
  const newQuestions = questions.filter(question => question.id !== id)
  return setQuestions(newQuestions)
@@ -71,16 +69,23 @@ const App = () => {
 
  const countQuestionStatus = questions.reduce((acc, {status})=> {
       acc[status] = (acc[status] || 0) + 1
-      console.log("acc",acc)
       return acc
       }, {})
 
-  
-    
 
+  const countPoints = ({questions, setPoint}) => {
+    const newPoints = questions.reduce((acc, {status}) => {
+        (status === "rejected") ? acc.push(10) : acc.push(1)
+        console.log("points acc", acc)
+        return acc
+    }, [])
+    return countSum({newPoints: newPoints, setPoint: setPoint})
+  }
 
-
-  
+  const countSum = ({newPoints, setPoint}) => {
+    const result = newPoints.reduce((acc, item) => acc + item)
+    return setPoint(result)
+  }
 
     return (
       <div className="App">
@@ -165,7 +170,14 @@ const App = () => {
     <p>You have  {countQuestionStatus.rejected || 0} rejected questions</p>
     <p>You have {countQuestionStatus.accepted || 0} accepted questions</p>
 
-  
+
+    <br/>
+    <hr/>
+    <br/>
+
+    {/* points  */}
+    <button onClick={() => countPoints({questions: questions, setPoint: setPoint})}>Show my points</button>
+    <p>You have {point} points</p>
     
       </div>
     );
